@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+
+  "name": "RTA-Bot",
+  "description": "Interval Monitor Extention.",
+  "version": "1.5",
+
+  "page_action": {
+    "default_icon": "images/icon.png",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "declarativeContent"
+  ],
+    "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://home-c12.incontact.com/inContact*"],
+      "css": ["css/monitor.css"]
+    }
+  ],
+  "web_accessible_resources": ["css/breaks.css"]
+}

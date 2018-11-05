@@ -1,0 +1,100 @@
+html,
+body {
+  font-family: 'Arial';
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
+}
+
+.template {
+  display: none;
+}
+
+.st0 {
+  opacity: 0.2;
+}
+.good .st0 {
+  fill: green !important;
+}
+.warning .st0 {
+  fill: orange !important;
+}
+.bad-down .st0 {
+  fill: red !important;
+}
+.bad-up .st0 {
+  fill: #756ef1 !important;
+}
+
+.card {
+  position: relative;
+  width: 300px;
+  min-height: 300px;
+  display: inline-block;
+  margin: 0.5em;
+  background-color: white;
+}
+.card .flag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: 250px;
+  z-index: 1;
+}
+.card .table {
+  position: relative;
+  box-sizing: border-box;
+  top: 0;
+  left: 0;
+  width: 300px;
+  z-index: 2;
+  display: grid;
+  padding: 0.5em;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 0.5em 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
+.table h2 {
+  text-align: center;
+  font-size: 18px;
+  margin: 0.5em 0;
+  grid-area: 1 / 1 / 2 / span 2;
+}
+.stat {
+  text-align: center;
+  padding: 0 0.5em;
+  display: flex;
+  flex-direction: column;
+}
+.stat h3 {
+  font-size: 11px;
+  margin: 0.25em 0;
+  color: #666666;
+  flex-grow: 1;
+}
+.sbt {
+  grid-column: 1 / span 2;
+  text-align: center;
+  margin: 0.25em 0;
+}
+.stat .num-1 {
+  font-size: 25px;
+}
+.intervals {
+  grid-area: auto / auto / auto / span 2;
+  display: flex;
+}
+.intervals h3 {
+  font-size: 10px;
+}
+
+.interval-delta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.interval-delta .perc {
+  font-size: 0.5em;
+  margin: 0 0.5em;
+}

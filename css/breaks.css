@@ -1,0 +1,97 @@
+/* BREAKS MONITOR */
+#gap_input_cont
+{
+  grid-area: 1 / 1 / span 2 / span 4;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: min-content min-content;
+}
+#gap_input_cont input
+{
+  padding: 0.25em;
+  font-size: 1.5em;
+  grid-row-end: span 2;
+  align-self: center;
+}
+.break-monitor-container {
+  display: grid;
+  grid-template-columns: repeat(4, 26em);
+  align-content: start;
+  grid-gap: 1em;
+  padding: 0.5em 1em;
+  width: 98% !important;
+}
+.break-monitor-container table {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 1em;
+}
+table.summary td:first-child,
+table.summary th:first-child {
+  width: 20em;
+}
+.break-monitor-container .monitor-list {
+  border: 1px solid #ccc;
+  display: inline-block;
+  padding: 1em;
+  min-width: 14em;
+  background-color: #fff;
+  vertical-align: top;
+}
+.break-monitor-container .monitor-list .title {
+  font-size: 1.2em;
+  margin-bottom: 0.3em;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
+.break-monitor-container .monitor-list .title span {
+  font-weight: normal;
+  font-size: 0.8em;
+  margin: 0 0.5em;
+}
+.break-monitor-container .monitor-list ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  position: relative;
+}
+.break-monitor-container .monitor-list ul li {
+  display: flex;
+}
+.break-monitor-container .monitor-list ul li .site,
+.break-monitor-container .monitor-list ul li .name {
+  padding: 0.25em 0.5em;
+}
+.break-monitor-container .monitor-list ul li .site {
+  width: 2.4em;
+}
+.break-monitor-container .monitor-list ul li .name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
+}
+.break-monitor-container .monitor-list ul li[data-valid="true"] {
+  color: green;
+}
+.break-monitor-container .monitor-list ul li[data-valid="false"] {
+  color: red;
+}
+.break-monitor-container .monitor-list ul li[data-status="0"] {
+  color: orange;
+}
+.ui-resizable-s {
+  height: 10px;
+}
+.ui-resizable-e {
+  width: 10px;
+}
+.ui-resizable-s,
+.ui-resizable-e {
+  background-color: hsla(210, 40%, 40%, 0.5);
+  transition: 200ms;
+}
+.ui-resizable-s:hover,
+.ui-resizable-e:hover {
+  background-color: hsla(210, 40%, 40%, 1);
+}
