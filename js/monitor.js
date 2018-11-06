@@ -73,9 +73,14 @@ InfoCard.prototype.buildCard = function() {
                     : 100;
   let cardClass = 'good';
 
-  if(deltaPer > 110 || deltaPer < 90) {
-    cardClass = "bad";
-  } else if (deltaPer >= 90 && deltaPer < 100) {
+  if(deltaPer > 110) {
+    cardClass = "bad-up";
+  }
+  else if(deltaPer < 90)
+  {
+    cardClass = "bad-down"
+  }
+  else if (deltaPer >= 90 && deltaPer < 100) {
     cardClass = "warning";
   }
 
