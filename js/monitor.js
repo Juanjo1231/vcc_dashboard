@@ -52,7 +52,7 @@ InfoCard.prototype.buildCard = function() {
   let mins   = today.getMinutes();
 
   today.setMinutes(0);
-  today.setMinutes(offset - 300);
+  today.setMinutes(offset - 360);
   today.setMinutes(mins);
 
   let hh    = today.getHours();
@@ -290,10 +290,10 @@ MonitorApp.prototype.updateRequirements = function() {
   }).then(data => {
     let raw_data = [];
 
+console.log(data)
     data.split("\n").forEach(row => {
       raw_data.push(row.split(","));
     });
-
     raw_data[0] = ["interval",
                    "weekDay",
                    "forecast:english",
@@ -301,8 +301,8 @@ MonitorApp.prototype.updateRequirements = function() {
                    "24 7 Intouch Tampa",
                    "24 7 Intouch Gaut",
                    "24 7 Intouch Guat Spanish",
-                   "24 7 Escal Guat",
-                   "24 7 Escal Tampa"];
+                   "24 7 Intouch Dotcom",
+                   "24 7 Intouch Nesting"];
     this.raw_data = raw_data;
     this.getRequirements();
   })
@@ -451,10 +451,14 @@ MonitorApp.prototype.updateStats = function() {
         if(state.match(regExp)){
           let stat = this.states[key];
           todayReqs[team_key].stats[stat] += 1;
+          todayReqs['24_7_intouch_dotcom'].stats[stat] += 1;
         }
       }
       todayReqs[team_key].stats.working  = todayReqs[team_key].stats.inCall  + todayReqs[team_key].stats.available;
       todayReqs[team_key].stats.loggedIn = todayReqs[team_key].stats.working + todayReqs[team_key].stats.unavailable;
+      // Dotcom combined
+      todayReqs['24_7_intouch_dotcom'].stats.working  = todayReqs['24_7_intouch_dotcom'].stats.inCall  + todayReqs['24_7_intouch_dotcom'].stats.available;
+      todayReqs['24_7_intouch_dotcom'].stats.loggedIn = todayReqs['24_7_intouch_dotcom'].stats.working + todayReqs['24_7_intouch_dotcom'].stats.unavailable;
     }
   }
   this.requirements[day_key] = todayReqs;
@@ -498,7 +502,7 @@ MonitorApp.prototype.updateCards = function() {
 
 /*
 * Starts the app if the document has completely loaded,
-* checks again in 1sec if not.
+* checks again every second if not.
 */
 function checkState() {
   if(document.readyState != "complete") {
