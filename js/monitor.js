@@ -224,42 +224,7 @@ Object.defineProperty(NestingInfoCard.prototype, 'constructor', {
 
 NestingInfoCard.prototype.buildCard = function() {
   let stats  = this.stats;
-  let today  = new Date();
-  let offset = today.getTimezoneOffset();
-  let mins   = today.getMinutes();
-
-  today.setMinutes(0);
-  today.setMinutes(offset - 360);
-  today.setMinutes(mins);
-
-  let hh    = today.getHours();
-  let hh2   = today.getMinutes() >= 30 ? hh+1 : hh; 
-  let mm    = today.getMinutes() >= 30 ? 0.5  : 0;
-  let mm2   = today.getMinutes() >= 30 ? 0    : 0.5;
-
-  let mtxt1 = mm  === 0.5 ? ":30" : ":00";
-  let mtxt2 = mm2 === 0   ? ":00" : ":30";
-
-  let interval1 = this.requirements.intervals[hh     +  mm] || 0;
-  let interval2 = this.requirements.intervals[hh2    + mm2] || 0;
-  let interval3 = this.requirements.intervals[(hh+1) +  mm] || 0;
-
-  let intervalDelta = stats.working - interval1.toFixed(0);
-  let deltaPer      = interval1 != 0
-                    ? ((stats.working / interval1.toFixed(0)) * 100).toFixed(0)
-                    : 100;
   let cardClass = 'good';
-
-  if(deltaPer > 110) {
-    cardClass = "bad-up";
-  }
-  else if(deltaPer < 90)
-  {
-    cardClass = "bad-down"
-  }
-  else if (deltaPer >= 90 && deltaPer < 100) {
-    cardClass = "warning";
-  }
 
   this.card = document.createElement("div");
   this.card.classList.add('card', cardClass);
@@ -293,36 +258,59 @@ NestingInfoCard.prototype.buildCard = function() {
         <div class="num-1 unavailable-agents">${stats.unavailable}</div>
       </div>
       <div class="stat">
-        <h3>GTM Unavailable</h3>
+        <h3>GTM Abay</br>Break / Lunch</h3>
         <div class="num-1 total-logged-in">${stats.loggedIn}</div>
       </div>
       <div class="stat">
-        <h3>TPA Unavailable</h3>
+        <h3>TPA Abay</br>Break / Lunch</h3>
         <div class="num-1 interval-delta">
-          ${intervalDelta}
-          <div class="perc">(${deltaPer}%)</div>
+          ${stats.intervalDelta}
         </div>
       </div>
-      <h3 class="sbt">Interval Requirements</h3>
+      <h3 class="sbt">Unavailable Status</h3>
       <div class="intervals">
         <div class="stat">
-          <h3>Current Interval <span class="current-interval-time">(${hh + mtxt1})</span></h3>
-          <div class="num-1 current-interval-req">${interval1.toFixed(0)}</div>
+          <h3>GUA Nesting</h3>
+          <div class="num-1 current-interval-req">${stats.interval1}</div>
         </div>
         <div class="stat">
-          <h3>Next Interval <span class="next-interval-time-1">(${hh2 + mtxt2})</span></h3>
-          <div class="num-1 next-interval-1">${interval2.toFixed(0)}</div>
+          <h3>TPA Nesting</span></h3>
+          <div class="num-1 next-interval-1">${stats.interval2}</div>
         </div>
         <div class="stat">
-          <h3>Next Interval <span class="next-interval-time-2">(${(hh+1) + mtxt1})</span></h3>
-          <div class="num-1 next-interval-2">${interval3.toFixed(0)}</div>
+          <h3>Other Unavailable</h3>
+          <div class="num-1 next-interval-2">${stats.interval3}</div>
         </div>
       </div>
     </div>`;
 
   this.parent.appendChild(this.card);
 };
+/*
+* Update card stats.
+*/
+NestingInfoCard.prototype.updateData = function(requirements) {
+  this.requirements = requirements;
+  let stats = requirements.stats;
+  let working     = this.card.querySelector(".working-agents");
+  let unavailable = this.card.querySelector(".unavailable-agents");
+  let loggedIn    = this.card.querySelector(".total-logged-in");
+  let delta       = this.card.querySelector(".interval-delta");
+  let interval    = this.card.querySelector(".current-interval-req");
+  let interval2   = this.card.querySelector(".next-interval-1");
+  let interval3   = this.card.querySelector(".next-interval-2");
+  let cardClass   = 'good';
 
+  this.card.classList = "";
+  this.card.classList.add("card", cardClass);
+
+  working.textContent     = stats.working;
+  unavailable.textContent = stats.unavailable;
+  loggedIn.textContent    = stats.loggedIn;
+  interval.textContent    = stats.interval1;
+  interval2.textContent   = stats.interval2;
+  interval3.textContent   = stats.interval3;
+};
 
 // ----- MONITOR APP-----//
 /*
@@ -378,15 +366,8 @@ MonitorApp.prototype.findList = function() {
 */
 MonitorApp.prototype.prepare = function() {
   this.mainContainer.innerHTML = "";
-
-  //this.uploadInput      = document.createElement("input");
-  //this.uploadInput.type = "file";
-  //this.uploadInput.id   = "upload_input";
-  //this.uploadInput.onchange = this.updateRequirements.bind(this);
-
   this.cardsContainer = document.createElement("div");
   this.cardsContainer.id  = "cards_container";
-
   this.mainContainer.style.height = "100%";
   //this.mainContainer.appendChild(this.uploadInput);
   this.mainContainer.appendChild(this.cardsContainer);
@@ -544,7 +525,10 @@ MonitorApp.prototype.updateStats = function() {
         unavailable: 0,
         working: 0,
         loggedIn: 0,
-        intervalDelta: 0
+        intervalDelta: 0,
+        interval1: 0,
+        interval2: 0,
+        interval3: 0
       }
     }
   }
@@ -557,22 +541,75 @@ MonitorApp.prototype.updateStats = function() {
     let team  = row[3].textContent.trim();
     let team_key = team.toLowerCase().replace(/\s/g, "_");
 
-    if(todayReqs[team_key]) {
-      for(key in this.states) {
+    if(todayReqs[team_key])
+    {
+      for(key in this.states)
+      {
         var exp    = `^${key}`;       // ^Available
         var regExp = new RegExp(exp); // /^Available/
 
-        if(state.match(regExp)){
+        if(state.match(regExp))
+        {
           let stat = this.states[key];
           todayReqs[team_key].stats[stat] += 1;
-          todayReqs['24_7_intouch_dotcom'].stats[stat] += 1;
+          if(!team_key.includes("spanish"))
+          {
+            todayReqs['24_7_intouch_dotcom'].stats[stat] += 1;
+          }
         }
       }
       todayReqs[team_key].stats.working  = todayReqs[team_key].stats.inCall  + todayReqs[team_key].stats.available;
       todayReqs[team_key].stats.loggedIn = todayReqs[team_key].stats.working + todayReqs[team_key].stats.unavailable;
-      // Dotcom combined
-      todayReqs['24_7_intouch_dotcom'].stats.working  = todayReqs['24_7_intouch_dotcom'].stats.inCall  + todayReqs['24_7_intouch_dotcom'].stats.available;
-      todayReqs['24_7_intouch_dotcom'].stats.loggedIn = todayReqs['24_7_intouch_dotcom'].stats.working + todayReqs['24_7_intouch_dotcom'].stats.unavailable;
+      if(!team_key.includes("spanish"))
+      {
+        // Dotcom combined
+        todayReqs['24_7_intouch_dotcom'].stats.working  = todayReqs['24_7_intouch_dotcom'].stats.inCall  + todayReqs['24_7_intouch_dotcom'].stats.available;
+        todayReqs['24_7_intouch_dotcom'].stats.loggedIn = todayReqs['24_7_intouch_dotcom'].stats.working + todayReqs['24_7_intouch_dotcom'].stats.unavailable;
+      }
+    }
+    else if (team_key.includes("nesting"))
+    {
+      let nest_key = '24_7_intouch_nesting';
+
+      if(team_key.includes("gua"))
+      {
+        if(state.match(/Inbound|Outbound|ACW/))
+        {
+          todayReqs[nest_key].stats.working += 1;
+        }
+        else if(state.match(/BREAK|LUNCH/))
+        {
+          todayReqs[nest_key].stats.loggedIn += 1;
+        }
+        else if(state.match(/NESTING/))
+        {
+          todayReqs[nest_key].stats.interval1 += 1;
+        }
+        else if(state.includes("Unavailable:"))
+        {
+          todayReqs[nest_key].stats.interval3 += 1;
+        }
+      }
+      else if(team_key.includes("tpa"))
+      {
+        if(state.match(/Inbound|Outbound|ACW/))
+        {
+          todayReqs[nest_key].stats.unavailable += 1;
+        }
+        else if(state.match(/BREAK|LUNCH/))
+        {
+          todayReqs[nest_key].stats.intervalDelta += 1;
+        }
+        else if(state.match(/NESTING/))
+        {
+          todayReqs[nest_key].stats.interval2 += 1;
+        }
+        else if(state.includes("Unavailable:"))
+        {
+          todayReqs[nest_key].stats.interval3 += 1;
+        }
+      }
+
     }
   }
   this.requirements[day_key] = todayReqs;
