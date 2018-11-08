@@ -208,6 +208,121 @@ InfoCard.prototype.updateData = function(requirements) {
 };
 
 
+/*
+* Special InfoCard
+*/
+const NestingInfoCard = function (sets = {}) {
+  InfoCard.call(this, sets); 
+}
+// Inheritance
+NestingInfoCard.prototype = Object.create(InfoCard.prototype);
+Object.defineProperty(NestingInfoCard.prototype, 'constructor', {
+  value: NestingInfoCard,
+  enumerable: false,
+  writable: true
+});
+
+NestingInfoCard.prototype.buildCard = function() {
+  let stats  = this.stats;
+  let today  = new Date();
+  let offset = today.getTimezoneOffset();
+  let mins   = today.getMinutes();
+
+  today.setMinutes(0);
+  today.setMinutes(offset - 360);
+  today.setMinutes(mins);
+
+  let hh    = today.getHours();
+  let hh2   = today.getMinutes() >= 30 ? hh+1 : hh; 
+  let mm    = today.getMinutes() >= 30 ? 0.5  : 0;
+  let mm2   = today.getMinutes() >= 30 ? 0    : 0.5;
+
+  let mtxt1 = mm  === 0.5 ? ":30" : ":00";
+  let mtxt2 = mm2 === 0   ? ":00" : ":30";
+
+  let interval1 = this.requirements.intervals[hh     +  mm] || 0;
+  let interval2 = this.requirements.intervals[hh2    + mm2] || 0;
+  let interval3 = this.requirements.intervals[(hh+1) +  mm] || 0;
+
+  let intervalDelta = stats.working - interval1.toFixed(0);
+  let deltaPer      = interval1 != 0
+                    ? ((stats.working / interval1.toFixed(0)) * 100).toFixed(0)
+                    : 100;
+  let cardClass = 'good';
+
+  if(deltaPer > 110) {
+    cardClass = "bad-up";
+  }
+  else if(deltaPer < 90)
+  {
+    cardClass = "bad-down"
+  }
+  else if (deltaPer >= 90 && deltaPer < 100) {
+    cardClass = "warning";
+  }
+
+  this.card = document.createElement("div");
+  this.card.classList.add('card', cardClass);
+
+  this.card.innerHTML = `
+    <svg class="flag"
+         version="1.1"
+         xmlns="http://www.w3.org/2000/svg"
+         x="0px" y="0px"
+         width="300px"
+         height="320px"
+         viewBox="0 0 300 320">
+      <g>
+        <path class="st0"
+              d="M0.2,315.7c0,0,48.2-198.5,199.2-315.5H0.4L0.2,315.7z"/>
+        <path class="st0"
+              d="M0.3,141.8c0,0,34.2-79.1,199.1-141.6L0,0L0.3,141.8z"/>
+        <path class="st0"
+              d="M0.4,40.5c0,0,67.9-29.8,199.4-40.3L0.4,0V40.5z"/>
+      </g>
+    </svg>
+
+    <div class="table">
+      <h2 class="table-title">${this.title}</h2>
+      <div class="stat">
+        <h3>Guatemala Abay</h3>
+        <div class="num-1 working-agents">${stats.working}</div>
+      </div>
+      <div class="stat">
+        <h3>Tampa Abay</h3>
+        <div class="num-1 unavailable-agents">${stats.unavailable}</div>
+      </div>
+      <div class="stat">
+        <h3>GTM Unavailable</h3>
+        <div class="num-1 total-logged-in">${stats.loggedIn}</div>
+      </div>
+      <div class="stat">
+        <h3>TPA Unavailable</h3>
+        <div class="num-1 interval-delta">
+          ${intervalDelta}
+          <div class="perc">(${deltaPer}%)</div>
+        </div>
+      </div>
+      <h3 class="sbt">Interval Requirements</h3>
+      <div class="intervals">
+        <div class="stat">
+          <h3>Current Interval <span class="current-interval-time">(${hh + mtxt1})</span></h3>
+          <div class="num-1 current-interval-req">${interval1.toFixed(0)}</div>
+        </div>
+        <div class="stat">
+          <h3>Next Interval <span class="next-interval-time-1">(${hh2 + mtxt2})</span></h3>
+          <div class="num-1 next-interval-1">${interval2.toFixed(0)}</div>
+        </div>
+        <div class="stat">
+          <h3>Next Interval <span class="next-interval-time-2">(${(hh+1) + mtxt1})</span></h3>
+          <div class="num-1 next-interval-2">${interval3.toFixed(0)}</div>
+        </div>
+      </div>
+    </div>`;
+
+  this.parent.appendChild(this.card);
+};
+
 
 // ----- MONITOR APP-----//
 /*
@@ -290,7 +405,6 @@ MonitorApp.prototype.updateRequirements = function() {
   }).then(data => {
     let raw_data = [];
 
-console.log(data)
     data.split("\n").forEach(row => {
       raw_data.push(row.split(","));
     });
@@ -475,8 +589,15 @@ MonitorApp.prototype.createCards = function() {
   let todayReqs = this.requirements[day_key];
 
   for(group in todayReqs) {
-    if(!group.includes("forecast")){
+    if(!group.includes("forecast") && !group.includes("nesting")){
       this.infoCards[group] = new InfoCard({
+        parent: this.cardsContainer,
+        title: todayReqs[group].title,
+        stats: todayReqs[group].stats,
+        requirements: todayReqs[group]
+      })
+    } else if(group.includes("nesting")) {
+      this.infoCards[group] = new NestingInfoCard({
         parent: this.cardsContainer,
         title: todayReqs[group].title,
         stats: todayReqs[group].stats,
