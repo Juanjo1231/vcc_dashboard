@@ -3,7 +3,8 @@
 
   "name": "RTA-Bot",
   "description": "Interval Monitor Extention.",
-  "version": "1.6",
+  "version": "1.7",
+  "version_name": "Including nesting in consolidated card.",
 
   "page_action": {
     "default_icon": "images/icon.png",

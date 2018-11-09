@@ -573,40 +573,48 @@ MonitorApp.prototype.updateStats = function() {
 
       if(team_key.includes("gua"))
       {
-        if(state.match(/Inbound|Outbound|ACW/))
+        if(state.match(/Inbound|Outbound|ACW|Available/))
         {
           todayReqs[nest_key].stats.working += 1;
+          todayReqs['24_7_intouch_dotcom'].stats.inCall += 1;
         }
         else if(state.match(/BREAK|LUNCH/))
         {
           todayReqs[nest_key].stats.loggedIn += 1;
+          todayReqs['24_7_intouch_dotcom'].stats.unavailable += 1;
         }
         else if(state.match(/NESTING/))
         {
           todayReqs[nest_key].stats.interval1 += 1;
+          todayReqs['24_7_intouch_dotcom'].stats.unavailable += 1;
         }
         else if(state.includes("Unavailable:"))
         {
           todayReqs[nest_key].stats.interval3 += 1;
+          todayReqs['24_7_intouch_dotcom'].stats.unavailable += 1;
         }
       }
       else if(team_key.includes("tpa"))
       {
-        if(state.match(/Inbound|Outbound|ACW/))
+        if(state.match(/Inbound|Outbound|ACW|Available/))
         {
           todayReqs[nest_key].stats.unavailable += 1;
+          todayReqs['24_7_intouch_dotcom'].stats.inCall += 1;
         }
         else if(state.match(/BREAK|LUNCH/))
         {
           todayReqs[nest_key].stats.intervalDelta += 1;
+          todayReqs['24_7_intouch_dotcom'].stats.unavailable += 1;
         }
         else if(state.match(/NESTING/))
         {
           todayReqs[nest_key].stats.interval2 += 1;
+          todayReqs['24_7_intouch_dotcom'].stats.unavailable += 1;
         }
         else if(state.includes("Unavailable:"))
         {
           todayReqs[nest_key].stats.interval3 += 1;
+          todayReqs['24_7_intouch_dotcom'].stats.unavailable += 1;
         }
       }
 
@@ -626,15 +634,15 @@ MonitorApp.prototype.createCards = function() {
   let todayReqs = this.requirements[day_key];
 
   for(group in todayReqs) {
-    if(!group.includes("forecast") && !group.includes("nesting")){
-      this.infoCards[group] = new InfoCard({
+    if(group.includes("nesting")) {
+      this.infoCards[group] = new NestingInfoCard({
         parent: this.cardsContainer,
         title: todayReqs[group].title,
         stats: todayReqs[group].stats,
         requirements: todayReqs[group]
       })
-    } else if(group.includes("nesting")) {
-      this.infoCards[group] = new NestingInfoCard({
+    } else if(!group.includes("forecast") && !group.includes("nesting")){
+      this.infoCards[group] = new InfoCard({
         parent: this.cardsContainer,
         title: todayReqs[group].title,
         stats: todayReqs[group].stats,
