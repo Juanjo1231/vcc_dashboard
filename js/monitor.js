@@ -165,7 +165,7 @@ InfoCard.prototype.updateData = function(requirements) {
   let mins   = today.getMinutes();
 
   today.setMinutes(0);
-  today.setMinutes(offset - 300);
+  today.setMinutes(offset - 360);
   today.setMinutes(mins);
 
   let hh    = today.getHours();

@@ -73,9 +73,11 @@ InfoCard.prototype.buildCard = function() {
                     : 100;
   let cardClass = 'good';
 
-  if(deltaPer > 110 || deltaPer < 90) {
-    cardClass = "bad";
-  } else if (deltaPer >= 90 && deltaPer < 100) {
+  if(deltaPer > 110) {
+    cardClass = "bad-up";
+  } else if(deltaPer < 90) {
+    cardClass = "bad-down";
+  }else if (deltaPer >= 90 && deltaPer < 100) {
     cardClass = "warning";
   }
 
@@ -178,8 +180,10 @@ InfoCard.prototype.updateData = function(requirements) {
                     : 100;
   let cardClass = 'good';
 
-  if(delta_pe > 110 || delta_pe < 90) {
-    cardClass = "bad";
+  if(delta_pe > 110) {
+    cardClass = "bad-up";
+  } else if(delta_pe < 90) {
+    cardClass = "bad-down";
   } else if (delta_pe >= 90 && delta_pe < 100) {
     cardClass = "warning";
   }
@@ -195,7 +199,6 @@ InfoCard.prototype.updateData = function(requirements) {
   interval3.textContent   = interval_3.toFixed(0);
   delta.innerHTML         = `${intervalDelta}<div class="perc">(${delta_pe}%)</div>`;
 };
-
 
 
 // ----- MONITOR APP-----//
@@ -288,7 +291,8 @@ MonitorApp.prototype.updateRequirements = function() {
                    "Grocery Phone",
                    "Grocery Email",
                    "Grocery Feedback",
-                   "Grocery Chat"];
+                   "Grocery Chat",
+                   "Grocery Overall"];
     this.raw_data = raw_data;
     this.getRequirements();
   })
@@ -444,11 +448,18 @@ MonitorApp.prototype.updateStats = function() {
           todayReqs[state_key].stats[stat]   += 1;
           todayReqs[state_key].stats.working  = todayReqs[state_key].stats.inCall  + todayReqs[state_key].stats.available;
           todayReqs[state_key].stats.loggedIn = todayReqs[state_key].stats.working + todayReqs[state_key].stats.unavailable;
+
+          todayReqs.grocery_overall.stats[stat] += 1;
+          todayReqs.grocery_overall.stats.working  = todayReqs.grocery_overall.stats.inCall  + todayReqs.grocery_overall.stats.available;
+          todayReqs.grocery_overall.stats.loggedIn = todayReqs.grocery_overall.stats.working + todayReqs.grocery_overall.stats.unavailable;
         }
         else if(state.match(regExp))
         {
           todayReqs[state_key].stats.working  += 1;
           todayReqs[state_key].stats.loggedIn += 1;
+
+          todayReqs.grocery_overall.stats.working  += 1;
+          todayReqs.grocery_overall.stats.loggedIn += 1;
         }
       }
     }
